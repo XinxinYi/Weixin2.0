@@ -16,16 +16,36 @@ import net.sf.json.JSONObject;
 
 public class Test {
 
-	public static void main(String[] args) throws ClientProtocolException, IOException {
-		try {
-			insert();
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		getNews();
+	public static void main(String[] args) throws ClientProtocolException, IOException, ParseException {
+		WeixinUtil.getAllMaterial();
+		WeixinUtil.getImgMaterial();
 
+	}
+	
+	public static String  getMany() throws ClientProtocolException, IOException{
+		//获取公众号中所有图文素材
+    	int offset = 0;
+    	int count = 2;
+    	JSONObject jsonObject = WeixinUtil.getAllMaterial();
+    	int total_count = jsonObject.getInt("total_count");
+    	
+    	//获取图文素材的item
+    	JSONArray jsonArray = jsonObject.getJSONArray("item");   
+    	
+    	System.out.println("此处应该添加一次！");
+    	while((offset+count) < total_count){
+    		
+    		System.out.println("增加前：offset:"+offset+",  count:"+count+",  total_count:"+total_count);
+    		offset = offset+count;
+    		JSONArray jsonArray2= WeixinUtil.getAllMaterial().getJSONArray("item");
+    		//System.out.println("jsonArray2:"+jsonArray2.toString());
+    		System.out.println("此处应该添加一次！");
+    		
+    		System.out.println("增加后：offset:"+offset+",  count:"+count+",  total_count:"+total_count);
+    		//System.out.println("spe:"+spe);
+    	}
+    	    	//jsonArray = jsonObject.fromObject(spe).toJSONArray(null);
+    	return null;
 	}
 	
 	public static void insert() throws ParseException{
@@ -64,52 +84,11 @@ public class Test {
 		
 	}
 	
-	public static void getImgM() throws ClientProtocolException, IOException{
-		JSONObject jsonObject = WeixinUtil.getImgMaterial();
-		System.out.println(jsonObject.toString());
-		int count = jsonObject.getInt("item_count");
-		System.out.println("count"+ count);
-		
-		JSONArray jsonArray = jsonObject.getJSONArray("item");
-		System.out.println(jsonArray.getJSONObject(0).getString("url"));
-		
-		String picurl = jsonArray.getJSONObject(0).getString("media_id");
-		
-		String media_id = "KW8gv0lZHIccoL1zL3B1Re4LVVC4nWxB443epAW6wGs";
-		
-		if(media_id.equals(picurl)){
-			System.out.println("匹配成功！！！！");
-		}
-		
-		
-		String url = WeixinUtil.getImgUrl(media_id);
-		System.out.println(url);
-	}
 	
 	
 	
-	public static void getImg() throws ClientProtocolException, IOException{
-		ArrayList newsList = new ArrayList<Article>();
-		newsList = WeixinUtil.getNews("尼玛");
-		Article article = new Article();
-		
-		article = (Article) newsList.get(0);
-
-		String thumb_media_id = article.getPicUrl();
-		
-		String url1 = "https://api.weixin.qq.com/cgi-bin/material/get_material?access_token=ACCESS_TOKEN";
-		String po = "{\"media_id\":MEDIA_ID}";
-		String url2 = url1.replace("ACCESS_TOKEN", WeixinUtil.getExitAccessToken().getToken());
-		String po2 = po.replace("MEDIA_ID",thumb_media_id);
-		JSONObject jsonObject = WeixinUtil.doPostStr(url2,po2);
-		System.out.println(url2);
-		System.out.println(po2);
-		System.out.println(jsonObject.toString());
-
-		
-		
-		System.out.println(article.getTitle());
-	}
+	
+	
 	
 	
 	public static void getNews() throws ClientProtocolException, IOException{

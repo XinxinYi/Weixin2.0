@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.dom4j.DocumentException;
 
 import com.weixin.data.SqlConn;
+import com.weixin.po.Article;
 import com.weixin.user.User;
 import com.weixin.util.CheckUtil;
 import com.weixin.util.MessageUtil;
@@ -57,7 +58,9 @@ public class WeixinServlet extends HttpServlet {
 				//用户发送任何文本消息，则回复抱歉内容
 					//String[] news = newsMap.get("电影");
 					System.out.println("这里是weixinServlet()，用户输入的是："+content);
-					ArrayList newsList = WeixinUtil.getNews(content);
+					SqlConn sql = new SqlConn();
+					ArrayList newsList = new ArrayList<Article>();
+					newsList = sql.selectMateId(content);
 					if(newsList.size() == 0){
 						message = MessageUtil.initText(toUserName, fromUserName, "抱歉，没有找到相关内容！");
 					}else{

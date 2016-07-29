@@ -8,10 +8,13 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 import org.apache.http.client.ClientProtocolException;
 
+import com.weixin.po.Article;
+import com.weixin.po.Image;
 import com.weixin.po.Material;
 import com.weixin.user.User;
 import com.weixin.util.ConfigUtil;
@@ -242,138 +245,13 @@ public class SqlConn {
      * 下面是关于素材的数据库管理
      * 
      */
-    public void addAllMaterial() throws ClientProtocolException, IOException, ParseException{
-    	//获取公众号中所有图文素材
-    	JSONObject jsonObject = WeixinUtil.getAllMaterial();
-    	//获取图文素材的个数
-    	int count = jsonObject.getInt("item_count");
-    	//获取图文素材的item
-    	JSONArray jsonArray = jsonObject.getJSONArray("item");
-    	//先遍历所有的图文
-    	for(int i=0;i<count;i++){
-    		Material material = new Material();
-    		material.setMedia_id(jsonArray.getJSONObject(i).getString("media_id"));
-    		material.setUpdate_time(jsonArray.getJSONObject(i).getString("update_time"));    		
-    		JSONArray art_arr = jsonArray.getJSONObject(i).getJSONArray("news_item");
-			int art_length = art_arr.size();
-			for(int j=0;j<art_length;j++){			
-	    		material.setTitle(art_arr.getJSONObject(j).getString("title"));
-				material.setDescription(art_arr.getJSONObject(j).getString("digest"));
-				String thumb_url = art_arr.getJSONObject(j).getString("thumb_url");
-				if("".equals(thumb_url)){
-					String thumb_media_id = art_arr.getJSONObject(j).getString("thumb_media_id");
-					
-				}							
-			}		
-    	}	   	
-    }
-    
-    //添加最新的图文素材到
-    public void addMaterial() throws ClientProtocolException, IOException, ParseException{
-    	//获取公众号中所有图文素材
-    	JSONObject jsonObject = WeixinUtil.getAllMaterial();
-    	//获取图文素材的个数
-    	int count = jsonObject.getInt("item_count");
-    	//获取图文素材的item
-    	JSONArray jsonArray = jsonObject.getJSONArray("item");   	
-    	//先遍历所有的图文
-    	for(int i=0;i<count;i++){
-    		String media_id = jsonArray.getJSONObject(i).getString("media_id");
-    		String update_time = jsonArray.getJSONObject(i).getString("update_time");
-    		
-	    	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");			
-			Date now_time = sdf.parse(sdf.format(new Date()));			
-			Long timeStamp = jsonArray.getJSONObject(i).getLong("update_time")*1000;			
-			Date data_time = sdf.parse(sdf.format(timeStamp));
-			
-			if(!data_time.before(now_time)){
-				JSONArray art_arr = jsonArray.getJSONObject(i).getJSONArray("news_item");
-				int art_length = art_arr.size();
-				for(int j=0;j<art_length;j++){
-					String title =  art_arr.getJSONObject(j).getString("title");
-					String digest = art_arr.getJSONObject(j).getString("digest");
-					
-					
-					String thumb_url = art_arr.getJSONObject(j).getString("thumb_url");
-					if("".equals(thumb_url)){
-						String thumb_media_id = art_arr.getJSONObject(j).getString("thumb_media_id");
-						thumb_url = SqlConn.getImgUrl(thumb_media_id);
-						
-						
-					}
-					String url = art_arr.getJSONObject(j).getString("url");
-					
-				}
-				System.out.println("图文消息比现在时间更往后");				
-			}
-    	}
-		
-    }
-    
-    
-    /*
-	 * 获取图片素材列表
-	 */
-	public static JSONObject getImgMaterial() throws ClientProtocolException, IOException {		
-		String url = WeixinUtil.GET_ALL_MATERIAL.replace("ACCESS_TOKEN", WeixinUtil.getExitAccessToken().getToken());
-		
-		
-		int offset = 0;
-		int count = 10;
-		String jsonStr = "{\"type\":\"image\",\"offset\":0,\"count\":20}";
-		JSONObject jsonObject = WeixinUtil.doPostStr(url,jsonStr);
-		
-		int total_count = jsonObject.getInt("total_count");
-		int item_count = jsonObject.getInt("item_count");
-		
-		JSONArray jsonArray = jsonObject.getJSONArray("item");
-		
-		for(int i=0;i<item_count;i++){
-			String update_time = jsonArray.getJSONObject(i).getString("update_time");
-			//时间格式化
-			SimpleDateFormat date = new SimpleDateFormat("yyyy-MM-dd");
-			
-		}						
-		while((offset+10) < total_count){
-			offset = offset + count;			
-		}
-		System.out.println("这里是getImgMaterial(),输出："+jsonObject.toString());
-		return jsonObject;
-	}
-	/*
-	 * 
-	 */
-	public static String getImgUrl(String thumb_media_id) throws ClientProtocolException, IOException{		
-		//获取公众号中所有图文素材
-		JSONObject jsonObject = WeixinUtil.getImgMaterial();
-		System.out.println("这里是getImgUrl(),输出："+jsonObject.toString());
-		//获取图文素材的个数
-		int count = jsonObject.getInt("item_count");
-		//int count = 1;
-		//获取图文素材的item
-		JSONArray jsonArray = jsonObject.getJSONArray("item");
-		
-		for(int i=0;i<count;i++){
-			String media_id = jsonArray.getJSONObject(i).getString("media_id");
-			System.out.println("media_id：　" + media_id);
-			System.out.println("thumb_media_id：　" + thumb_media_id);
-			if(media_id.equals(thumb_media_id)){
-				String url = jsonArray.getJSONObject(i).getString("url");
-				return url;				
-			}
-		}				
-		return null;
-	}
-	
-    
-    
     //将图文素材插入数据库中
-    public void insertMaterial(){
-    	String insert = "insert into weixin_users" + " values('"+user.getOpenid()+"','"+user.getNickname()+"','"+user.getSex()+"','"+user.getLanguage()+"','"+user.getCity()+"','"+user.getProvince()+"','"+ user.getCountry()+"','"+user.getHeadimgurl()+"','"+user.getSubscribe_time()+"','"+user.getUnionid()+"','"+user.getRemark()+"','"+user.getGroupid()+"','"+user.getLastSignTime()+"','"+user.getSignCount()+"','" + user.getSignAllCount() + "','" +user.isTodaySign()+ "','" +user.getPoints() +"')";
-    	
+    public void insertMaterial(Material material){
+    	String insert = "insert into weixin_materials" + " values('"+ material.getMedia_id()+"','"+ material.getUpdate_time()+"','" +material.getArt_count()+"','" +material.getTitle()+"','"+material.getDescription()+"','"+material.getPicUrl()+"','"+material.getUrl()+"','"+ material.getContent_source_url()+",)";
+    	    	
     	System.out.println(insert);
     	try {	
-			this.connSQL("weixin_users");
+			this.connSQL("weixin_materials");
 			stmt = conn.createStatement();
 			stmt.executeUpdate(insert);
 		} catch (SQLException e) {
@@ -383,7 +261,75 @@ public class SqlConn {
     	this.deconnSQL(); 
     	
     }
-    public void updateMaterial(){
+    
+  //将图文素材插入数据库中
+    public void insertImage(Image image){
+    	String insert = "insert into weixin_images" + " values('"+ image.getMediaId()+"','"+ image.getName()+"','" +image.getUpdate_time()+"','" +image.getUrl()+",)";   	    	
+    	System.out.println(insert);
+    	try {	
+			this.connSQL("weixin_images");
+			stmt = conn.createStatement();
+			stmt.executeUpdate(insert);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}       	                 
+    	this.deconnSQL(); 
     	
     }
+    
+    //查找图片素材表中的数据，通过media_id找到相应的url
+    public String selectImgUrl(String media_id){
+    	String select = "select * from weixin_images where media_id = '"+media_id+"'";
+    	System.out.println(select);
+    	String url = null;
+    	try {	
+			this.connSQL("weixin_images");
+			stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery(select);
+			while (rs.next()) {	
+				url = rs.getString("url");
+			}
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}       	                 
+    	this.deconnSQL();
+    	return url;
+    }
+    
+    //通过关键字，查找数据表中的图文素材的id
+    public ArrayList selectMateId(String keyWord){
+    	String selectId = "select * FROM weixin_materials WHERE digest like %"+keyWord+"%";
+    	System.out.println(selectId);
+    	String media_id = null;
+    	ArrayList newsList = new ArrayList<Article>();
+    	try {	
+			this.connSQL("weixin_materials");
+			stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery(selectId);
+			while (rs.next()) {	
+				media_id = rs.getString("media_id");
+			}
+			String selectNews = "select * from weixin_materials where media_id = '"+media_id+"'";
+			ResultSet rs2 = stmt.executeQuery(selectNews);
+			while (rs2.next()){
+				Article article = new Article();
+				article.setTitle(rs2.getString("title"));
+				article.setDescription(rs2.getString("digest"));
+				article.setPicUrl(rs2.getString("thumb_media_url"));
+				article.setUrl(rs2.getString("url"));																	
+				newsList.add(article);
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}       	                 
+    	this.deconnSQL();
+    	return newsList;
+    }
+    
+    //通过图文素材的id。找到该图文的所有数据
+   
 }

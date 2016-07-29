@@ -15,8 +15,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -40,12 +38,15 @@ import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 import com.weixin.data.CreatTable;
+import com.weixin.data.SqlConn;
 import com.weixin.menu.Button;
 import com.weixin.menu.ClickButton;
 import com.weixin.menu.Menu;
 import com.weixin.menu.ViewButton;
 import com.weixin.po.AccessToken;
 import com.weixin.po.Article;
+import com.weixin.po.Image;
+import com.weixin.po.Material;
 import com.weixin.user.User;
 
 import net.sf.json.JSONArray;
@@ -435,112 +436,119 @@ public class WeixinUtil {
 	 */
 	public static JSONObject getAllMaterial() throws ClientProtocolException, IOException {		
 		String url = WeixinUtil.GET_ALL_MATERIAL.replace("ACCESS_TOKEN", WeixinUtil.getExitAccessToken().getToken());
-		
-		String jsonStr = "{\"type\":\"news\",\"offset\":0,\"count\":10}";
+		int offset = 0;
+		int count = 20;
+		String jsonStr = "{\"type\":\"news\",\"offset\":"+offset+",\"count\":"+count+"}";
 		JSONObject jsonObject = doPostStr(url,jsonStr);
-		System.out.println("这里是getAllMaterial(),输出："+jsonObject.toString());
+		System.out.println(jsonObject.toString());
+		
+		
+		int total_count = jsonObject.getInt("total_count");
+		int item_count = jsonObject.getInt("item_count");
+		JSONArray jsonArray = jsonObject.getJSONArray("item");
+		System.out.println("jsonArray item:"+ jsonArray.toString());		
+		System.out.println("jsonArray item2: " + jsonArray.getJSONObject(0).getJSONArray("news_item").toString());
+		//先添加到数据库中
+		WeixinUtil.addMateToData(jsonArray, item_count);
+		
+		//如果图文素材不能一次取出，则需要循环
+		while((item_count+offset) < total_count){
+			offset = offset + item_count;
+			jsonStr = "{\"type\":\"news\",\"offset\":"+offset+",\"count\":"+count+"}";
+			JSONObject jsonObject2 = doPostStr(url,jsonStr);
+			int item_count2 = jsonObject2.getInt("item_count");
+			JSONArray jsonArray2 = jsonObject2.getJSONArray("item");			
+			//先添加到数据库中
+			WeixinUtil.addMateToData(jsonArray2, item_count2);
+		}
+		
 		return jsonObject;
+	}
+	
+	//将获取的图文素材拆分开，并存储到数据库中
+	public static void addMateToData(JSONArray jsonArray,int item_count) throws ClientProtocolException, IOException{
+		SqlConn sql = new SqlConn();
+		//先遍历所有的图文
+    	for(int i=0;i<item_count;i++){
+    		Material material = new Material();
+    		material.setMedia_id(jsonArray.getJSONObject(i).getString("media_id"));
+    		material.setUpdate_time(jsonArray.getJSONObject(i).getString("update_time"));    		
+    		
+    		JSONArray art_arr = jsonArray.getJSONObject(i).getJSONArray("news_item");
+			int art_length = art_arr.size();
+			material.setArt_count(art_length);
+			for(int j=0;j<art_length;j++){			
+	    		material.setTitle(art_arr.getJSONObject(j).getString("title"));
+				material.setDescription(art_arr.getJSONObject(j).getString("digest"));
+				String thumb_url = art_arr.getJSONObject(j).getString("thumb_url");
+				if("".equals(thumb_url)){
+					String thumb_media_id = art_arr.getJSONObject(j).getString("thumb_media_id");
+					//通过数据表中的数据查找对应的url
+					thumb_url = sql.selectImgUrl(thumb_media_id);
+				}
+				material.setPicUrl(thumb_url);
+				sql.insertMaterial(material);
+			}		
+    	}
 	}
 	
 	/*
 	 * 获取图片素材列表
 	 */
-	public static JSONObject getImgMaterial() throws ClientProtocolException, IOException {		
-		String url = WeixinUtil.GET_ALL_MATERIAL.replace("ACCESS_TOKEN", WeixinUtil.getExitAccessToken().getToken());
-		
+	public static void getImgMaterial() throws ClientProtocolException, IOException, ParseException {		
+		String get_url = WeixinUtil.GET_ALL_MATERIAL.replace("ACCESS_TOKEN", WeixinUtil.getExitAccessToken().getToken());
+		SqlConn sql = new SqlConn();
 		
 		int offset = 0;
-		int count = 10;
-		String jsonStr = "{\"type\":\"image\",\"offset\":0,\"count\":10}";
-		JSONObject jsonObject = doPostStr(url,jsonStr);
+		int count = 20;
+		String jsonStr = "{\"type\":\"image\",\"offset\":"+offset+",\"count\":"+count+"}";
+		JSONObject jsonObject = doPostStr(get_url,jsonStr);
 		
 		int total_count = jsonObject.getInt("total_count");
 		int item_count = jsonObject.getInt("item_count");
-		
 		JSONArray jsonArray = jsonObject.getJSONArray("item");
 		
+		//先添加到数据库中
+		WeixinUtil.addImgToData(jsonArray, item_count);
+		
+		//如果图片素材不能一次取出，则需要循环
+		while((item_count+offset) < total_count){
+			offset = offset + item_count;
+			jsonStr = "{\"type\":\"image\",\"offset\":"+offset+",\"count\":"+count+"}";
+			JSONObject jsonObject2 = doPostStr(get_url,jsonStr);
+			int item_count2 = jsonObject2.getInt("item_count");
+			JSONArray jsonArray2 = jsonObject2.getJSONArray("item");			
+			//先添加到数据库中
+			WeixinUtil.addImgToData(jsonArray2, item_count2);
+		}	
+		
+	}
+	
+	//将图片素材存储到数据库中
+	public static void addImgToData(JSONArray jsonArray,int item_count) throws ParseException{
+		SqlConn sql = new SqlConn();
 		for(int i=0;i<item_count;i++){
-			String update_time = jsonArray.getJSONObject(i).getString("update_time");
-			//时间格式化
-			SimpleDateFormat date = new SimpleDateFormat("yyyy-MM-dd");
+			Image image = new Image();
+			image.setMediaId(jsonArray.getJSONObject(i).getString("media_id"));
+			image.setName(jsonArray.getJSONObject(i).getString("name"));
+			Long update_time = jsonArray.getJSONObject(i).getLong("update_time");			
+			image.setUpdate_time(WeixinUtil.stampToTime(update_time).toString());
+			image.setUrl(jsonArray.getJSONObject(i).getString("url"));
 			
+			sql.insertImage(image);					
 		}
-		
-		
-		
-		while((offset+10) < total_count){
-			offset = offset + count;
-			
-		}
-		System.out.println("这里是getImgMaterial(),输出："+jsonObject.toString());
-		return jsonObject;
 	}
-	/*
-	 * 
-	 */
-	public static String getImgUrl(String thumb_media_id) throws ClientProtocolException, IOException{		
-		//获取公众号中所有图文素材
-		JSONObject jsonObject = WeixinUtil.getImgMaterial();
-		System.out.println("这里是getImgUrl(),输出："+jsonObject.toString());
-		//获取图文素材的个数
-		int count = jsonObject.getInt("item_count");
-		//int count = 1;
-		//获取图文素材的item
-		JSONArray jsonArray = jsonObject.getJSONArray("item");
 		
-		for(int i=0;i<count;i++){
-			String media_id = jsonArray.getJSONObject(i).getString("media_id");
-			System.out.println("media_id：　" + media_id);
-			System.out.println("thumb_media_id：　" + thumb_media_id);
-			if(media_id.equals(thumb_media_id)){
-				String url = jsonArray.getJSONObject(i).getString("url");
-				return url;				
-			}
-		}				
-		return null;
-	}
 	
-	/*
-	 * 通过关键字匹配查找图文
-	 */
-	public static ArrayList getNews(String keyWord) throws ClientProtocolException, IOException{		
-		//获取公众号中所有图文素材
-		JSONObject jsonObject = WeixinUtil.getAllMaterial();
-		//获取图文素材的个数
-		int count = jsonObject.getInt("item_count");
-		//获取图文素材的item
-		JSONArray jsonArray = jsonObject.getJSONArray("item");
-		//新建一个list，用于存放匹配的图文
-		ArrayList newsList = new ArrayList<Article>();
-		//先遍历所有的图文
-		for(int i=0;i<count;i++){
-			
-			//按素材的顺序获取每个素材中的具体内容
-			JSONArray articles = jsonArray.getJSONObject(i).getJSONObject("content").getJSONArray("news_item");
-			//获取单个图文中，第一篇文章的标题
-			String firstTitle = articles.getJSONObject(0).getString("digest");
-			//如果第一篇文章的标题含有关键字，则匹配成功
-			if(firstTitle.indexOf(keyWord) >= 0 ){
-				//将匹配成功的图文，存放到List中
-				for(int j=0;j<articles.size();j++){	
-					Article article = new Article();
-					article.setTitle(articles.getJSONObject(j).getString("title"));
-					article.setDescription(articles.getJSONObject(j).getString("digest"));
-					//article.setPicUrl(articles.getJSONObject(j).getString("thumb_media_id"));
-					//找出图片素材中匹配的pic_url
-					//String pic_url = WeixinUtil.getImgUrl(articles.getJSONObject(j).getString("thumb_media_id"));
-					String pic_url = articles.getJSONObject(j).getString("thumb_url");
-					System.out.println(pic_url);
-					article.setPicUrl(pic_url);
-					article.setUrl(articles.getJSONObject(j).getString("url"));																	
-					newsList.add(article);					
-				}
-				//找到一个匹配的图文消息，即退出。
-				break;
-			}			
-		}
-		return newsList;
-	}
 	
+	
+	//将时间戳转变为Date格式
+	public static Date stampToTime(Long stamp) throws ParseException{			
+    	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");							
+		Long timeStamp = stamp * 1000;			
+		Date time = sdf.parse(sdf.format(timeStamp));
+		
+		return time;
+	}
 
 }

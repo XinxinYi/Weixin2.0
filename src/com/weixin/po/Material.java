@@ -5,6 +5,7 @@ package com.weixin.po;
 public class Material extends Article{
 	private String media_id;
 	private String update_time;
+	private int art_count;
 	public String getMedia_id() {
 		return media_id;
 	}
@@ -16,6 +17,12 @@ public class Material extends Article{
 	}
 	public void setUpdate_time(String update_time) {
 		this.update_time = update_time;
+	}
+	public int getArt_count() {
+		return art_count;
+	}
+	public void setArt_count(int art_count) {
+		this.art_count = art_count;
 	}
 	
 }
