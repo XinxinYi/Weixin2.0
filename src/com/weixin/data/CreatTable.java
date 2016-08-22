@@ -12,8 +12,16 @@ import com.weixin.util.ConfigUtil;
 public class CreatTable {
 	
 	//获取配置文件，更改项目位置时需要修改
+<<<<<<< HEAD
 
 	public static String configUrl = "../../workspace/Weixin2/WebContent/WEB-INF/config.properties";	
+=======
+<<<<<<< HEAD
+	public static String configUrl = "../../workspace/Weixin/WebContent/WEB-INF/config.properties";	
+=======
+	public static String configUrl = "../../workspace/Weixin2.0/WebContent/WEB-INF/config.properties";	
+>>>>>>> input keyword,output news
+>>>>>>> 1ebf37a98216d387fbec25e64a94ad5d1a7e5d51
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -34,6 +42,7 @@ public class CreatTable {
 				Connection connect = DriverManager.getConnection(
 						CONN_URL,USERNAME,PASSWORD);
 				           //连接URL为   jdbc:mysql//服务器地址/数据库名  ，后面的2个参数分别是登陆用户名和密码
+<<<<<<< HEAD
 				      String createUser = "CREATE TABLE weixin_users (openid varchar(100) not null unique, nickname varchar(20), sex int null, language varchar(20),city varchar(20),province varchar(20),country varchar(20),headimgurl varchar(200),subscribe_time varchar(20),unionid varchar(20),remark varchar(20),groupid varchar(20),lastSignTime varchar(20),signCount int, signAllCount int ,todaySign varchar(20),points int) ENGINE = MyISAM  DEFAULT CHARSET = utf8;";
 				      Statement stmt = connect.prepareStatement(createUser);
 				      stmt.execute(createUser);
@@ -43,6 +52,11 @@ public class CreatTable {
 				      
 				      String createImg = "CREATE TABLE weixin_images (media_id varchar(200) not null unique, name varchar(20), update_time varchar(200),url varchar(200)) ENGINE = MyISAM  DEFAULT CHARSET = utf8;";
 				      stmt.execute(createImg);
+=======
+				      String sql = "CREATE TABLE weixin_users (openid varchar(100) not null unique, nickname varchar(20), sex int null, language varchar(20),city varchar(20),province varchar(20),country varchar(20),headimgurl varchar(200),subscribe_time varchar(20),unionid varchar(20),remark varchar(20),groupid varchar(20),lastSignTime varchar(20),signCount int, signAllCount int ,todaySign varchar(20),points int) ENGINE = MyISAM  DEFAULT CHARSET = utf8;";
+				      Statement stmt = connect.prepareStatement(sql);
+				      stmt.execute(sql);
+>>>>>>> 1ebf37a98216d387fbec25e64a94ad5d1a7e5d51
 				      //ResultSet rs = stmt.executeQuery("select * from weixin_users");					     					      
 					   /*   
 					while (rs.next()) {

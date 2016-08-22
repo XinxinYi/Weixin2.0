@@ -15,6 +15,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
+<<<<<<< HEAD
+=======
+import java.util.HashMap;
+import java.util.Map;
+>>>>>>> 1ebf37a98216d387fbec25e64a94ad5d1a7e5d51
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -38,15 +43,21 @@ import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 import com.weixin.data.CreatTable;
+<<<<<<< HEAD
 import com.weixin.data.SqlConn;
+=======
+>>>>>>> 1ebf37a98216d387fbec25e64a94ad5d1a7e5d51
 import com.weixin.menu.Button;
 import com.weixin.menu.ClickButton;
 import com.weixin.menu.Menu;
 import com.weixin.menu.ViewButton;
 import com.weixin.po.AccessToken;
 import com.weixin.po.Article;
+<<<<<<< HEAD
 import com.weixin.po.Image;
 import com.weixin.po.Material;
+=======
+>>>>>>> 1ebf37a98216d387fbec25e64a94ad5d1a7e5d51
 import com.weixin.user.User;
 
 import net.sf.json.JSONArray;
@@ -61,7 +72,11 @@ public class WeixinUtil {
 	private static final String UPLOAD_URL = "https://api.weixin.qq.com/cgi-bin/media/upload?access_token=ACCESS_TOKEN&type=TYPE";
 	private static final String CREATE_MENU_URL = "https://api.weixin.qq.com/cgi-bin/menu/create?access_token=ACCESS_TOKEN";
 	private static final String GET_USER_URL = "https://api.weixin.qq.com/cgi-bin/user/info?access_token=ACCESS_TOKEN&openid=OPENID&lang=zh_CN";
+<<<<<<< HEAD
 	public static final String GET_ALL_MATERIAL = "https://api.weixin.qq.com/cgi-bin/material/batchget_material?access_token=ACCESS_TOKEN";
+=======
+	private static final String GET_ALL_MATERIAL = "https://api.weixin.qq.com/cgi-bin/material/batchget_material?access_token=ACCESS_TOKEN";
+>>>>>>> 1ebf37a98216d387fbec25e64a94ad5d1a7e5d51
 	
 	//private static final String XML_TOKEN_URL = "../../workspace/Weixin/xmlToken.xml";
 	
@@ -432,6 +447,7 @@ public class WeixinUtil {
 	}
 	
 	/*
+<<<<<<< HEAD
 	 * 获取图文素材列表
 	 */
 	public static JSONObject getAllMaterial() throws ClientProtocolException, IOException, ParseException {		
@@ -568,5 +584,53 @@ public class WeixinUtil {
 		
 		return time;
 	}
+=======
+	 * 获取素材列表
+	 */
+	public static JSONObject getAllMaterial() throws ClientProtocolException, IOException {		
+		String url = WeixinUtil.GET_ALL_MATERIAL.replace("ACCESS_TOKEN", WeixinUtil.getAccessToken().getToken());
+		
+		String jsonStr = "{\"type\":\"news\",\"offset\":0,\"count\":10}";
+		JSONObject jsonObject = doPostStr(url,jsonStr);
+
+		return jsonObject;
+	}
+	/*
+	 * 通过关键字匹配查找图文
+	 */
+	public static ArrayList getNews(String keyWord) throws ClientProtocolException, IOException{		
+		//获取公众号中所有图文素材
+		JSONObject jsonObject = WeixinUtil.getAllMaterial();
+		//获取图文素材的个数
+		int count = jsonObject.getInt("item_count");
+		//获取图文素材的item
+		JSONArray jsonArray = jsonObject.getJSONArray("item");
+		//新建一个list，用于存放匹配的图文
+		ArrayList newsList = new ArrayList<Article>();
+		//先遍历所有的图文
+		for(int i=0;i<count;i++){
+			//按素材的顺序获取每个素材中的具体内容
+			JSONArray articles = jsonArray.getJSONObject(i).getJSONObject("content").getJSONArray("news_item");
+			//获取单个图文中，第一篇文章的标题
+			String firstTitle = articles.getJSONObject(0).getString("title");
+			//如果第一篇文章的标题含有关键字，则匹配成功
+			if(firstTitle.indexOf(keyWord) >= 0 ){
+				//将匹配成功的图文，存放到List中
+				for(int j=0;j<articles.size();j++){	
+					Article article = new Article();
+					article.setTitle(articles.getJSONObject(j).getString("title"));
+					article.setDescription(articles.getJSONObject(j).getString("digest"));
+					article.setPicUrl(articles.getJSONObject(j).getString("thumb_media_id"));
+					article.setUrl(articles.getJSONObject(j).getString("url"));																	
+					newsList.add(article);					
+				}
+				//找到一个匹配的图文消息，即退出。
+				break;
+			}			
+		}
+		return newsList;
+	}
+	
+>>>>>>> 1ebf37a98216d387fbec25e64a94ad5d1a7e5d51
 
 }

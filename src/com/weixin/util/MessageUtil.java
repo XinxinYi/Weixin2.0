@@ -179,7 +179,11 @@ public class MessageUtil {
 	public static String initImageMessage(String toUserName,String fromUserName){
 		String message = null;
 		Image image = new Image();
+<<<<<<< HEAD
 		image.setMediaId("KW8gv0lZHIccoL1zL3B1Re4LVVC4nWxB443epAW6wGs");
+=======
+		image.setMediaId("JiF1AlIFT4TgrALeExilEKTh7kNeukc3SLwS215UrTFMufsUlXx57Sn2HmZ0XVO7");
+>>>>>>> 1ebf37a98216d387fbec25e64a94ad5d1a7e5d51
 		ImageMessage im = new ImageMessage();
 		im.setFromUserName(toUserName);
 		im.setToUserName(fromUserName);
@@ -220,9 +224,12 @@ public class MessageUtil {
 	 */
 	public static String abstractNewsMessage(String toUserName,String fromUserName, ArrayList newsList){
 		String message = null;
+<<<<<<< HEAD
 		
 		System.out.println("abstract,newslist: "+newsList.size());
 		
+=======
+>>>>>>> 1ebf37a98216d387fbec25e64a94ad5d1a7e5d51
 		List<Article> articleList = new ArrayList<Article>();
 		NewsMessage newsMessage = new NewsMessage();
 						

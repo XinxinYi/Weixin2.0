@@ -15,7 +15,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.dom4j.DocumentException;
 
 import com.weixin.data.SqlConn;
+<<<<<<< HEAD
 import com.weixin.po.Article;
+=======
+>>>>>>> 1ebf37a98216d387fbec25e64a94ad5d1a7e5d51
 import com.weixin.user.User;
 import com.weixin.util.CheckUtil;
 import com.weixin.util.MessageUtil;
@@ -55,6 +58,7 @@ public class WeixinServlet extends HttpServlet {
 			
 			String message = null;
 			if(MessageUtil.MESSAGE_TEXT.equals(msgType)){				
+<<<<<<< HEAD
 				//用户发送关键字，查找并回复相应的图文，查找不到则回复抱歉。
 				SqlConn sql = new SqlConn();				
 				ArrayList newsList = new ArrayList<Article>();
@@ -66,6 +70,21 @@ public class WeixinServlet extends HttpServlet {
 					message = MessageUtil.abstractNewsMessage(toUserName, fromUserName, newsList);
 				}
 
+=======
+				//用户发送任何文本消息，则回复抱歉内容
+				//Map<String,String[]> newsMap = AbstractNews.getNews();
+				
+					
+					//String[] news = newsMap.get("电影");
+					ArrayList newsList = WeixinUtil.getNews(content);
+					if(newsList.size() == 0){
+						message = MessageUtil.initText(toUserName, fromUserName, "抱歉，没有找到相关内容！");
+					}else{
+						message = MessageUtil.abstractNewsMessage(toUserName, fromUserName, newsList);
+					}
+
+			
+>>>>>>> 1ebf37a98216d387fbec25e64a94ad5d1a7e5d51
 				
 			}else if(MessageUtil.MESSAGE_EVENT.equals(msgType)){
 				String eventType = map.get("Event");			
@@ -129,7 +148,11 @@ public class WeixinServlet extends HttpServlet {
 				message = MessageUtil.initText(toUserName, fromUserName,Label);
 			}
 			
+<<<<<<< HEAD
 			System.out.println(message);
+=======
+			//System.out.println(message);
+>>>>>>> 1ebf37a98216d387fbec25e64a94ad5d1a7e5d51
 			out.print(message);
 			
 		}catch(DocumentException e){

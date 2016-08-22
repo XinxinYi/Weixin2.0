@@ -1,11 +1,15 @@
 package com.weixin.data;
 
+<<<<<<< HEAD
 import java.io.IOException;
+=======
+>>>>>>> 1ebf37a98216d387fbec25e64a94ad5d1a7e5d51
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+<<<<<<< HEAD
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -22,6 +26,11 @@ import com.weixin.util.WeixinUtil;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
+=======
+
+import com.weixin.user.User;
+import com.weixin.util.ConfigUtil;
+>>>>>>> 1ebf37a98216d387fbec25e64a94ad5d1a7e5d51
 /*
  * 从数据库查找用户数据
  */
@@ -30,7 +39,11 @@ public class SqlConn {
 	private Connection conn = null;  
     private Statement stmt = null; 
     
+<<<<<<< HEAD
 	public void connSQL(String tableName){
+=======
+	public void connSQL(){
+>>>>>>> 1ebf37a98216d387fbec25e64a94ad5d1a7e5d51
 		
 		
 		try {						
@@ -48,7 +61,11 @@ public class SqlConn {
 		      
 		    //System.out.println("Success connect Mysql server!");
 		    stmt = conn.createStatement();
+<<<<<<< HEAD
 		    ResultSet rs = stmt.executeQuery("select * from " + tableName);
+=======
+		    ResultSet rs = stmt.executeQuery("select * from weixin_users");
+>>>>>>> 1ebf37a98216d387fbec25e64a94ad5d1a7e5d51
 		     
 		    //user 为你表的名称
 		    }catch (Exception e) {
@@ -74,7 +91,11 @@ public class SqlConn {
     	
     	System.out.println(insert);
     	try {	
+<<<<<<< HEAD
 			this.connSQL("weixin_users");
+=======
+			this.connSQL();
+>>>>>>> 1ebf37a98216d387fbec25e64a94ad5d1a7e5d51
 			stmt = conn.createStatement();
 			stmt.executeUpdate(insert);
 		} catch (SQLException e) {
@@ -89,7 +110,11 @@ public class SqlConn {
     	String update = "UPDATE weixin_users set headimgurl='" +user.getHeadimgurl()+"',lastSignTime ='"+user.getLastSignTime()+"', signCount='"+user.getSignCount()+ "', signAllCount='" +user.getSignAllCount() + "', todaySign='"+user.isTodaySign()+ "', points='"+user.getPoints() +"' where openid='"+user.getOpenid()+"'";    	
     	System.out.println(update);
     	try {	
+<<<<<<< HEAD
 			this.connSQL("weixin_users");
+=======
+			this.connSQL();
+>>>>>>> 1ebf37a98216d387fbec25e64a94ad5d1a7e5d51
 			stmt = conn.createStatement();
 			stmt.executeUpdate(update);
 		} catch (SQLException e) {
@@ -103,7 +128,11 @@ public class SqlConn {
     	String select = "select * from weixin_users where openid = '" +openId + "'";
     	User user = new User();
     	try {	
+<<<<<<< HEAD
 			this.connSQL("weixin_users");
+=======
+			this.connSQL();
+>>>>>>> 1ebf37a98216d387fbec25e64a94ad5d1a7e5d51
 			stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery(select);
 			while (rs.next()) {	
@@ -137,7 +166,11 @@ public class SqlConn {
     	String selectAll = "select * from weixin_users where todaySign = 'true' order by lastSignTime desc";
     	String selectCount = "select count(*)  as countSign from (select * from weixin_users where todaySign = 'true' order by lastSignTime desc) as signCount";
     	try {	
+<<<<<<< HEAD
     		this.connSQL("weixin_users");
+=======
+    		this.connSQL();
+>>>>>>> 1ebf37a98216d387fbec25e64a94ad5d1a7e5d51
 			stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery(selectAll);
 			//获取检索到的条目数，即今日签到总人数
@@ -171,7 +204,11 @@ public class SqlConn {
     	String selectAll = "select * from weixin_users order by points desc,lastSignTime desc";
     	String selectCount = "select count(*)  as userCounts from (select * from weixin_users order by points desc) as userCounts";
     	try {	
+<<<<<<< HEAD
     		this.connSQL("weixin_users");
+=======
+    		this.connSQL();
+>>>>>>> 1ebf37a98216d387fbec25e64a94ad5d1a7e5d51
 			stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery(selectAll);
 			//获取检索到的条目数，即今日签到总人数
@@ -217,7 +254,11 @@ public class SqlConn {
     //删除用户信息，用户取消关注时调用
     public void deleteUser(String openId){
     	String delete = "delete from weixin_users where openid= '" + openId +"'";      	
+<<<<<<< HEAD
     	this.connSQL("weixin_users");		
+=======
+    	this.connSQL();		
+>>>>>>> 1ebf37a98216d387fbec25e64a94ad5d1a7e5d51
 		try {
 			stmt = conn.createStatement();
 			stmt.executeUpdate(delete);
@@ -230,7 +271,11 @@ public class SqlConn {
     //将数据库里所有todaySign值置为false，每日凌晨调用
     public void updateTodaySign(){
     	String update = "update weixin_users set todaySign = 'false'";
+<<<<<<< HEAD
     	this.connSQL("weixin_users");		
+=======
+    	this.connSQL();		
+>>>>>>> 1ebf37a98216d387fbec25e64a94ad5d1a7e5d51
 		try {
 			stmt = conn.createStatement();
 			stmt.executeUpdate(update);
@@ -241,6 +286,7 @@ public class SqlConn {
     	this.deconnSQL();
     }
      
+<<<<<<< HEAD
     /*
      * 下面是关于素材的数据库管理
      * 
@@ -337,4 +383,6 @@ public class SqlConn {
     
     //通过图文素材的id。找到该图文的所有数据
    
+=======
+>>>>>>> 1ebf37a98216d387fbec25e64a94ad5d1a7e5d51
 }

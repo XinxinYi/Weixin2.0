@@ -30,8 +30,16 @@ public class GetHtml {
             //System.out.println(links);
             
             for (Element link : links) {        	               	
+<<<<<<< HEAD
             	String linkHref = link.attr("data-src");	          
 
+=======
+<<<<<<< HEAD
+            	String linkHref = link.attr("data-src");	          
+=======
+            	String linkHref = link.attr("src");	          
+>>>>>>> input keyword,output news
+>>>>>>> 1ebf37a98216d387fbec25e64a94ad5d1a7e5d51
 	            if(linkHref.endsWith("jpeg")){
 	            	title_img[1] = linkHref;
 	            		break;
