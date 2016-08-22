@@ -220,6 +220,9 @@ public class MessageUtil {
 	 */
 	public static String abstractNewsMessage(String toUserName,String fromUserName, ArrayList newsList){
 		String message = null;
+		
+		System.out.println("abstract,newslist: "+newsList.size());
+		
 		List<Article> articleList = new ArrayList<Article>();
 		NewsMessage newsMessage = new NewsMessage();
 						

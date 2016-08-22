@@ -247,7 +247,7 @@ public class SqlConn {
      */
     //将图文素材插入数据库中
     public void insertMaterial(Material material){
-    	String insert = "insert into weixin_materials" + " values('"+ material.getMedia_id()+"','"+ material.getUpdate_time()+"','" +material.getArt_count()+"','" +material.getTitle()+"','"+material.getDescription()+"','"+material.getPicUrl()+"','"+material.getUrl()+"','"+ material.getContent_source_url()+",)";
+    	String insert = "insert into weixin_materials" + " values('"+ material.getMedia_id()+"','"+ material.getUpdate_time()+"','" +material.getArt_count()+"','" +material.getTitle()+"','"+material.getDescription()+"','"+material.getPicUrl()+"','"+material.getUrl()+"','"+ material.getContent_source_url()+"')";
     	    	
     	System.out.println(insert);
     	try {	
@@ -264,7 +264,7 @@ public class SqlConn {
     
   //将图文素材插入数据库中
     public void insertImage(Image image){
-    	String insert = "insert into weixin_images" + " values('"+ image.getMediaId()+"','"+ image.getName()+"','" +image.getUpdate_time()+"','" +image.getUrl()+",)";   	    	
+    	String insert = "insert into weixin_images" + " values('"+ image.getMediaId()+"','"+ image.getName()+"','" +image.getUpdate_time()+"','" +image.getUrl()+"')";   	    	
     	System.out.println(insert);
     	try {	
 			this.connSQL("weixin_images");
@@ -299,27 +299,31 @@ public class SqlConn {
     	return url;
     }
     
+    
     //通过关键字，查找数据表中的图文素材的id
     public ArrayList selectMateId(String keyWord){
-    	String selectId = "select * FROM weixin_materials WHERE digest like %"+keyWord+"%";
-    	System.out.println(selectId);
-    	String media_id = null;
-    	ArrayList newsList = new ArrayList<Article>();
+    	String selectId = "select * from weixin_materials where digest like '%"+keyWord+"%'";
+    	System.out.println("selectId: "+selectId);
+    	
+    	ArrayList newsList = new ArrayList<Article>();   	
     	try {	
 			this.connSQL("weixin_materials");
 			stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery(selectId);
+			ResultSet rs = stmt.executeQuery(selectId);					
+			String media_id = "";
 			while (rs.next()) {	
 				media_id = rs.getString("media_id");
+				System.out.println("media_id: "+ media_id);
 			}
 			String selectNews = "select * from weixin_materials where media_id = '"+media_id+"'";
+			System.out.println("selectNews: " + selectNews);
 			ResultSet rs2 = stmt.executeQuery(selectNews);
 			while (rs2.next()){
 				Article article = new Article();
 				article.setTitle(rs2.getString("title"));
 				article.setDescription(rs2.getString("digest"));
 				article.setPicUrl(rs2.getString("thumb_media_url"));
-				article.setUrl(rs2.getString("url"));																	
+				article.setUrl(rs2.getString("url"));	
 				newsList.add(article);
 			}
 		} catch (SQLException e) {
@@ -327,6 +331,7 @@ public class SqlConn {
 			e.printStackTrace();
 		}       	                 
     	this.deconnSQL();
+    	System.out.println("newsList.size:"+newsList.size());
     	return newsList;
     }
     

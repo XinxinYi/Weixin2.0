@@ -55,19 +55,17 @@ public class WeixinServlet extends HttpServlet {
 			
 			String message = null;
 			if(MessageUtil.MESSAGE_TEXT.equals(msgType)){				
-				//用户发送任何文本消息，则回复抱歉内容
-					//String[] news = newsMap.get("电影");
-					System.out.println("这里是weixinServlet()，用户输入的是："+content);
-					SqlConn sql = new SqlConn();
-					ArrayList newsList = new ArrayList<Article>();
-					newsList = sql.selectMateId(content);
-					if(newsList.size() == 0){
-						message = MessageUtil.initText(toUserName, fromUserName, "抱歉，没有找到相关内容！");
-					}else{
-						message = MessageUtil.abstractNewsMessage(toUserName, fromUserName, newsList);
-					}
+				//用户发送关键字，查找并回复相应的图文，查找不到则回复抱歉。
+				SqlConn sql = new SqlConn();				
+				ArrayList newsList = new ArrayList<Article>();
+				newsList = sql.selectMateId(content);
+					
+				if(newsList.size() == 0){
+					message = MessageUtil.initText(toUserName, fromUserName, "抱歉，没有找到相关内容！");
+				}else{
+					message = MessageUtil.abstractNewsMessage(toUserName, fromUserName, newsList);
+				}
 
-			
 				
 			}else if(MessageUtil.MESSAGE_EVENT.equals(msgType)){
 				String eventType = map.get("Event");			

@@ -38,10 +38,10 @@ public class CreatTable {
 				      Statement stmt = connect.prepareStatement(createUser);
 				      stmt.execute(createUser);
 				      
-				      String createMaterial = "CREATE TABLE weixin_materials (media_id varchar(200) not null, update_time varchar(100), art_count int,title varchar(1000),digest varchar(2000), thumb_media_url varchar(200),  url varchar(200),content_source_url varchar(200)) ENGINE = MyISAM  DEFAULT CHARSET = utf8;";
+				      String createMaterial = "CREATE TABLE weixin_materials (media_id varchar(200) not null, update_time varchar(200), art_count int,title varchar(1000),digest varchar(2000), thumb_media_url varchar(200),  url varchar(200),content_source_url varchar(200)) ENGINE = MyISAM  DEFAULT CHARSET = utf8;";
 				      stmt.execute(createMaterial);
 				      
-				      String createImg = "CREATE TABLE weixin_images (media_id varchar(200) not null unique, name varchar(20), update_time varchar(20),url varchar(200)) ENGINE = MyISAM  DEFAULT CHARSET = utf8;";
+				      String createImg = "CREATE TABLE weixin_images (media_id varchar(200) not null unique, name varchar(20), update_time varchar(200),url varchar(200)) ENGINE = MyISAM  DEFAULT CHARSET = utf8;";
 				      stmt.execute(createImg);
 				      //ResultSet rs = stmt.executeQuery("select * from weixin_users");					     					      
 					   /*   

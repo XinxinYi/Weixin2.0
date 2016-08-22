@@ -22,7 +22,7 @@ public class Test {
 
 	}
 	
-	public static String  getMany() throws ClientProtocolException, IOException{
+	public static String  getMany() throws ClientProtocolException, IOException, ParseException{
 		//获取公众号中所有图文素材
     	int offset = 0;
     	int count = 2;
@@ -91,7 +91,7 @@ public class Test {
 	
 	
 	
-	public static void getNews() throws ClientProtocolException, IOException{
+	public static void getNews() throws ClientProtocolException, IOException, ParseException{
 		// TODO Auto-generated method stub
 				JSONObject jsonObject = WeixinUtil.getAllMaterial();
 				System.out.println(jsonObject);

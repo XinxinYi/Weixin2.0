@@ -434,7 +434,7 @@ public class WeixinUtil {
 	/*
 	 * 获取图文素材列表
 	 */
-	public static JSONObject getAllMaterial() throws ClientProtocolException, IOException {		
+	public static JSONObject getAllMaterial() throws ClientProtocolException, IOException, ParseException {		
 		String url = WeixinUtil.GET_ALL_MATERIAL.replace("ACCESS_TOKEN", WeixinUtil.getExitAccessToken().getToken());
 		int offset = 0;
 		int count = 20;
@@ -446,8 +446,6 @@ public class WeixinUtil {
 		int total_count = jsonObject.getInt("total_count");
 		int item_count = jsonObject.getInt("item_count");
 		JSONArray jsonArray = jsonObject.getJSONArray("item");
-		System.out.println("jsonArray item:"+ jsonArray.toString());		
-		System.out.println("jsonArray item2: " + jsonArray.getJSONObject(0).getJSONArray("news_item").toString());
 		//先添加到数据库中
 		WeixinUtil.addMateToData(jsonArray, item_count);
 		
@@ -457,7 +455,7 @@ public class WeixinUtil {
 			jsonStr = "{\"type\":\"news\",\"offset\":"+offset+",\"count\":"+count+"}";
 			JSONObject jsonObject2 = doPostStr(url,jsonStr);
 			int item_count2 = jsonObject2.getInt("item_count");
-			JSONArray jsonArray2 = jsonObject2.getJSONArray("item");			
+			JSONArray jsonArray2 = jsonObject2.getJSONArray("item");				
 			//先添加到数据库中
 			WeixinUtil.addMateToData(jsonArray2, item_count2);
 		}
@@ -466,29 +464,41 @@ public class WeixinUtil {
 	}
 	
 	//将获取的图文素材拆分开，并存储到数据库中
-	public static void addMateToData(JSONArray jsonArray,int item_count) throws ClientProtocolException, IOException{
+	public static void addMateToData(JSONArray jsonArray,int item_count) throws ClientProtocolException, IOException, ParseException{
 		SqlConn sql = new SqlConn();
 		//先遍历所有的图文
     	for(int i=0;i<item_count;i++){
-    		Material material = new Material();
-    		material.setMedia_id(jsonArray.getJSONObject(i).getString("media_id"));
-    		material.setUpdate_time(jsonArray.getJSONObject(i).getString("update_time"));    		
     		
-    		JSONArray art_arr = jsonArray.getJSONObject(i).getJSONArray("news_item");
-			int art_length = art_arr.size();
-			material.setArt_count(art_length);
-			for(int j=0;j<art_length;j++){			
-	    		material.setTitle(art_arr.getJSONObject(j).getString("title"));
-				material.setDescription(art_arr.getJSONObject(j).getString("digest"));
-				String thumb_url = art_arr.getJSONObject(j).getString("thumb_url");
-				if("".equals(thumb_url)){
-					String thumb_media_id = art_arr.getJSONObject(j).getString("thumb_media_id");
-					//通过数据表中的数据查找对应的url
-					thumb_url = sql.selectImgUrl(thumb_media_id);
-				}
-				material.setPicUrl(thumb_url);
-				sql.insertMaterial(material);
-			}		
+    		//获取图文创建的时间，如果与现在时间小于1天，则加入数据库中，否则不添加。
+    		Date item_time = WeixinUtil.stampToTime(jsonArray.getJSONObject(i).getLong("update_time"));
+    		Date now_time = new Date();
+    		long tmp = (now_time.getTime() - item_time.getTime()) / (1000 * 60 * 60 * 24);;    		
+    		if(tmp < 1){    			    			    		
+	    		Material material = new Material();
+	    		material.setMedia_id(jsonArray.getJSONObject(i).getString("media_id"));
+	    		material.setUpdate_time(item_time.toString());    		
+	    		System.out.println("**********输出jsonArray.item,第"+i+"个*******");
+	    		System.out.println("该item创建时间是：" + item_time);
+	
+	    		System.out.println(jsonArray.getJSONObject(i).toString());	    		
+	    		JSONArray art_arr = jsonArray.getJSONObject(i).getJSONObject("content").getJSONArray("news_item");
+	    		//JSONArray art_arr = jsonArray.getJSONObject(i).getJSONObject("news_item");
+				int art_length = art_arr.size();
+				material.setArt_count(art_length);
+				for(int j=0;j<art_length;j++){			
+		    		material.setTitle(art_arr.getJSONObject(j).getString("title"));
+					material.setDescription(art_arr.getJSONObject(j).getString("digest"));
+					String thumb_url = art_arr.getJSONObject(j).getString("thumb_url");
+					if("".equals(thumb_url)){
+						String thumb_media_id = art_arr.getJSONObject(j).getString("thumb_media_id");
+						//通过数据表中的数据查找对应的url
+						thumb_url = sql.selectImgUrl(thumb_media_id);
+					}
+					material.setPicUrl(thumb_url);
+					material.setUrl(art_arr.getJSONObject(j).getString("url"));
+					sql.insertMaterial(material);
+				}	
+    		}
     	}
 	}
 	
@@ -528,14 +538,22 @@ public class WeixinUtil {
 	public static void addImgToData(JSONArray jsonArray,int item_count) throws ParseException{
 		SqlConn sql = new SqlConn();
 		for(int i=0;i<item_count;i++){
-			Image image = new Image();
-			image.setMediaId(jsonArray.getJSONObject(i).getString("media_id"));
-			image.setName(jsonArray.getJSONObject(i).getString("name"));
-			Long update_time = jsonArray.getJSONObject(i).getLong("update_time");			
-			image.setUpdate_time(WeixinUtil.stampToTime(update_time).toString());
-			image.setUrl(jsonArray.getJSONObject(i).getString("url"));
+			Date item_time = WeixinUtil.stampToTime(jsonArray.getJSONObject(i).getLong("update_time"));
+    		Date now_time = new Date();
+    		long tmp = (now_time.getTime() - item_time.getTime()) / (1000 * 60 * 60 * 24);;
+    		
+    		if(tmp < 1){
+    			System.out.println("这个是小于1天的");	
 			
-			sql.insertImage(image);					
+				Image image = new Image();
+				image.setMediaId(jsonArray.getJSONObject(i).getString("media_id"));
+				image.setName(jsonArray.getJSONObject(i).getString("name"));
+				//Long update_time = jsonArray.getJSONObject(i).getLong("update_time");			
+				image.setUpdate_time(item_time.toString());
+				image.setUrl(jsonArray.getJSONObject(i).getString("url"));
+				
+				sql.insertImage(image);	
+    		}
 		}
 	}
 		
