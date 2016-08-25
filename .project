@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-<<<<<<< HEAD
 	<name>Weixin2</name>
-=======
-	<name>Weixin</name>
->>>>>>> 1ebf37a98216d387fbec25e64a94ad5d1a7e5d51
 	<comment></comment>
 	<projects>
 	</projects>
@@ -37,4 +33,11 @@
 		<nature>org.eclipse.jdt.core.javanature</nature>
 		<nature>org.eclipse.wst.jsdt.core.jsNature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>WebContent/files</name>
+			<type>2</type>
+			<locationURI>PARENT-2-PROJECT_LOC/Weixin2/WebContent/files</locationURI>
+		</link>
+	</linkedResources>
 </projectDescription>

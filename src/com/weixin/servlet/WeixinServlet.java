@@ -15,10 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.dom4j.DocumentException;
 
 import com.weixin.data.SqlConn;
-<<<<<<< HEAD
 import com.weixin.po.Article;
-=======
->>>>>>> 1ebf37a98216d387fbec25e64a94ad5d1a7e5d51
 import com.weixin.user.User;
 import com.weixin.util.CheckUtil;
 import com.weixin.util.MessageUtil;
@@ -58,34 +55,25 @@ public class WeixinServlet extends HttpServlet {
 			
 			String message = null;
 			if(MessageUtil.MESSAGE_TEXT.equals(msgType)){				
-<<<<<<< HEAD
-				//用户发送关键字，查找并回复相应的图文，查找不到则回复抱歉。
-				SqlConn sql = new SqlConn();				
-				ArrayList newsList = new ArrayList<Article>();
-				newsList = sql.selectMateId(content);
-					
-				if(newsList.size() == 0){
-					message = MessageUtil.initText(toUserName, fromUserName, "抱歉，没有找到相关内容！");
+				//如果用户发送一个字，则不去匹配。
+				if(content.length() == 1){
+					message = MessageUtil.initText(toUserName, fromUserName, "请发送关键词搜索！");
 				}else{
-					message = MessageUtil.abstractNewsMessage(toUserName, fromUserName, newsList);
-				}
-
-=======
-				//用户发送任何文本消息，则回复抱歉内容
-				//Map<String,String[]> newsMap = AbstractNews.getNews();
-				
-					
-					//String[] news = newsMap.get("电影");
-					ArrayList newsList = WeixinUtil.getNews(content);
-					if(newsList.size() == 0){
+					//排除一些无意义的词语
+					if(content.equals("是的") || content.equals("不是") || content.equals("好的") || content.equals("也是") || content.equals("就是")){
 						message = MessageUtil.initText(toUserName, fromUserName, "抱歉，没有找到相关内容！");
-					}else{
-						message = MessageUtil.abstractNewsMessage(toUserName, fromUserName, newsList);
+					}else{						
+						//用户发送关键字，查找并回复相应的图文，查找不到则回复抱歉。
+						SqlConn sql = new SqlConn();				
+						ArrayList newsList = new ArrayList<Article>();
+						newsList = sql.selectMateId(content);																	
+						if(newsList.size() == 0){
+							message = MessageUtil.initText(toUserName, fromUserName, "抱歉，没有找到相关内容！");
+						}else{
+							message = MessageUtil.abstractNewsMessage(toUserName, fromUserName, newsList);
+						}						
 					}
-
-			
->>>>>>> 1ebf37a98216d387fbec25e64a94ad5d1a7e5d51
-				
+				}																										
 			}else if(MessageUtil.MESSAGE_EVENT.equals(msgType)){
 				String eventType = map.get("Event");			
 				if(MessageUtil.MESSAGE_SUBSCRIBE.equals(eventType)){
@@ -97,13 +85,23 @@ public class WeixinServlet extends HttpServlet {
 					SqlConn sc = new SqlConn();
 					sc.insertUser(user);
 					
-				}else if(MessageUtil.MESSAGE_CLICK.equals(eventType)){
+				}else if(MessageUtil.MESSAGE_CLICK.equals(eventType)){					
 					String key = map.get("EventKey");
-					if(key.equals("21_qiandao")){
+					if(key.equals("21_qiandao")){						
 						//message = MessageUtil.initText(toUserName, fromUserName, MessageUtil.menuText());
 						User user = new User();
 						SqlConn sc = new SqlConn();
 						user = sc.selectUser(fromUserName);
+						System.out.println("user.openid:"+ user.getOpenid());
+						if(user.getOpenid() == null){
+							user = WeixinUtil.getUser(fromUserName);
+							sc.insertUser(user);
+							user.setTodaySign(false);
+							user.setSignAllCount(0);
+							user.setSignCount(0);
+							user.setLastSignTime("2000-01-01 00:00:00");
+						}
+						
 						SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 						
 						if(user.isTodaySign()){
@@ -123,7 +121,7 @@ public class WeixinServlet extends HttpServlet {
 							user.setSignAllCount(user.getSignAllCount()+1);
 							user.setLastSignTime(sdf.format(new Date()));
 							user.setPoints(user.getPoints() + WeixinUtil.getPoints(user.getSignCount()));
-							System.out.println("本次points=" + WeixinUtil.getPoints(user.getSignCount()));
+							//System.out.println("本次points=" + WeixinUtil.getPoints(user.getSignCount()));
 							sc.updateUser(user);
 							message = MessageUtil.signNewsMessage(toUserName, fromUserName);
 						}							
@@ -147,12 +145,7 @@ public class WeixinServlet extends HttpServlet {
 				String Label = map.get("Label");
 				message = MessageUtil.initText(toUserName, fromUserName,Label);
 			}
-			
-<<<<<<< HEAD
-			System.out.println(message);
-=======
 			//System.out.println(message);
->>>>>>> 1ebf37a98216d387fbec25e64a94ad5d1a7e5d51
 			out.print(message);
 			
 		}catch(DocumentException e){

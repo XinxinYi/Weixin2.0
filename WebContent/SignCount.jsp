@@ -65,9 +65,7 @@ function tuijian(url){
 <body>
 	<%
 		//运行定时任务，在零点将所有用户的todaySign值置为false
-		TimeUpdate tu = new TimeUpdate();
-		tu.showTimer();		
-		
+		TimeUpdate.autoUpdate();			
 		String path = request.getContextPath();
 		String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
 		String openId = request.getParameter("openid");//用request得到
