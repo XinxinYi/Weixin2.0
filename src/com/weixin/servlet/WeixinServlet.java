@@ -61,7 +61,7 @@ public class WeixinServlet extends HttpServlet {
 				}else{
 					//排除一些无意义的词语
 					if(content.equals("是的") || content.equals("不是") || content.equals("好的") || content.equals("也是") || content.equals("就是")){
-						message = MessageUtil.initText(toUserName, fromUserName, "抱歉，没有找到相关内容！");
+						message = MessageUtil.initText(toUserName, fromUserName, "抱歉，没有找到相关内容！");						
 					}else{						
 						//用户发送关键字，查找并回复相应的图文，查找不到则回复抱歉。
 						SqlConn sql = new SqlConn();				
@@ -92,9 +92,13 @@ public class WeixinServlet extends HttpServlet {
 						User user = new User();
 						SqlConn sc = new SqlConn();
 						user = sc.selectUser(fromUserName);
+						System.out.println("fromUserName:" + fromUserName);
 						System.out.println("user.openid:"+ user.getOpenid());
-						if(user.getOpenid() == null){
+						System.out.println("fromUserName:" + fromUserName);
+						if(user.getOpenid() == null){	
+							System.out.println("fromUserName:" + fromUserName);
 							user = WeixinUtil.getUser(fromUserName);
+							user.setOpenid(fromUserName);
 							sc.insertUser(user);
 							user.setTodaySign(false);
 							user.setSignAllCount(0);
